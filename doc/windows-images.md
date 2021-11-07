@@ -135,7 +135,7 @@ The disk image will be in the default QEMU Copy-On-Write version 2
 disk. If the image will be used on volume storage, the "raw" format
 needs to be used. Use the `--format` option to set the format; use the
 `--help` option or read the [openstack-image-maker
-manual](https://github.com/qcif/openstack-image-maker/blob/master/openstack-image-maker)
+manual](https://github.com/qcif/openstack-image-maker/blob/master/openstack-image-maker.md)
 (a Markdown file from the GitHub repository) for details.
 
 The VNC server is listening by default on display 0 (port 5900). Use a

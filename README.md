@@ -33,9 +33,9 @@ machine.
 
 ## Documentation
 
-A manual page for the utility is in:
+The utility is documented in:
 
-- [openstack-image-maker](openstack-image-maker.md)
+- [openstack-image-maker](openstack-image-maker.md) manual page
 
 See the _doc_ directory for details on how to use it:
 
