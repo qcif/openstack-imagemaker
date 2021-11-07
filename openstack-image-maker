@@ -27,7 +27,7 @@
 #----------------------------------------------------------------
 
 PROGRAM='openstack-image-maker'
-VERSION='2.6.1'
+VERSION='2.7.0'
 
 EXE=$(basename "$0" .sh)
 EXE_EXT=$(basename "$0")
@@ -160,7 +160,13 @@ done
 
 if [ -n "$SHOW_HELP" ]; then
   cat <<EOF
-Usage: $EXE_EXT (create|run|upload) [options] diskImage
+Usage: $EXE_EXT command [options] diskImage
+Commands:
+  create  - create a disk image and run VM from it
+  run     - run VM from an existing disk image
+  stop    - kills the VM started by create or run
+  upload  - upload disk image to Glance
+  status  - output the status
 
 Options for create:
   -s | --size GIB        size of disk to create in GiB (default: $DEFAULT_DISK_SIZE_GIB GiB)
@@ -218,9 +224,13 @@ fi
 #----------------
 # Check the command is one of the known commands
 
-if [ "$CMD" != 'create' ] && [ "$CMD" !=  'run' ] && [ "$CMD" != 'upload' ];
+if [ "$CMD" != 'create' ] \
+     && [ "$CMD" != 'run' ] \
+     && [ "$CMD" != 'stop' ] \
+     && [ "$CMD" != 'upload' ] \
+     && [ "$CMD" != 'status' ];
 then
-  echo "$EXE: error: unknown command: $CMD (expecting create, run, upload)" >&2
+  echo "$EXE: error: unknown command: $CMD" >&2
   exit 2
 fi
 
@@ -243,7 +253,7 @@ if [ "$CMD" = 'create' ]; then
     echo "$EXE: error: image file exists (use \"run\" instead?): $IMAGE" >&2
     exit 1
   fi
-else
+elif [ "$CMD" != 'status' ]; then
   # Using an existing disk image: file MUST already exist and can be read
 
   if [ ! -e "$IMAGE" ]; then
@@ -333,11 +343,20 @@ if [ "$RAM_SIZE" -gt $((64 * 1024))  ]; then
   exit 2
 fi
 
-REAL_RAM_KB=$(grep MemTotal /proc/meminfo | sed -E 's/^.*: *([0-9]+) kB$/\1/')
-REAL_RAM=$(($REAL_RAM_KB / 1024))
-RAM_OVERHEAD=128 # MiB allowed for host operating system
-if [ $(($REAL_RAM - $RAM_OVERHEAD)) -le "$RAM_SIZE" ]; then
-  echo "$EXE: WARNING: VM uses $RAM_SIZE MiB (available: $REAL_RAM MiB)" >&2
+HOST_RAM_KB=$(grep MemTotal /proc/meminfo 2>/dev/null | sed -E 's/^.*: *([0-9]+) kB$/\1/')
+if [ -n "$HOST_RAM_KB" ]; then
+  HOST_RAM=$(($HOST_RAM_KB / 1024))
+
+  if [ -n "$VERBOSE" ]; then
+    echo "$EXE: host has $HOST_RAM MiB RAM ($HOST_RAM_KB KiB)"
+  fi
+
+  RAM_OVERHEAD=128 # MiB allowed for host operating system
+  if [ $(($HOST_RAM - $RAM_OVERHEAD)) -le "$RAM_SIZE" ]; then
+    echo "$EXE: WARNING: VM uses $RAM_SIZE MiB (available: $HOST_RAM MiB)" >&2
+  fi
+else
+  echo "$EXE: WARNING: could not determine available RAM on host" >&2
 fi
 
 #----------------
@@ -359,9 +378,25 @@ if [ "$NUM_CPUS" -gt 16 ]; then
   exit 2
 fi
 
-REAL_CORES=$(grep 'cpu cores' /proc/cpuinfo | sed -E 's/^.*: *([0-9]+)$/\1/')
-if [ "$REAL_CORES" -le "$NUM_CPUS" ]; then
-  echo "$EXE: WARNING: VM uses $NUM_CPUS cores (available: $REAL_CORES)" >&2
+# Sum up cores from each of the processors
+HOST_PROCESSORS=0
+HOST_CORES=0
+for CORES in $(grep 'cpu cores' /proc/cpuinfo 2>/dev/null \
+                 | sed -E 's/^.*: *([0-9]+)$/\1/'); do
+  HOST_PROCESSORS=$(($HOST_PROCESSORS + 1))
+  HOST_CORES=$(($HOST_CORES + $CORES))
+done
+
+if [ "$HOST_CORES" -ne 0 ]; then
+  if [ -n "$VERBOSE" ]; then
+    echo "$EXE: host has $HOST_CORES cores (on $HOST_PROCESSORS processors)"
+  fi
+
+if [ "$HOST_CORES" -le "$NUM_CPUS" ]; then
+    echo "$EXE: WARNING: VM uses $NUM_CPUS cores (available: $HOST_CORES)" >&2
+  fi
+else
+  echo "$EXE: WARNING: could not determine available cores on host" >&2
 fi
 
 #----------------
@@ -402,6 +437,14 @@ if [ "$CMD" = 'upload' ]; then
     exit 2
   fi
 fi
+
+#----------------------------------------------------------------
+# Utility functions
+
+_logfile_name() {
+  echo "${IMAGE}.log"
+}
+
 #----------------------------------------------------------------
 # Run the image in a virtual machine
 
@@ -504,7 +547,7 @@ run_vm () {
 
   # Run QEMU in background (nohup so user can log out without stopping it)
 
-  local LOGFILE="${IMAGE}.log"
+  local LOGFILE=$(_logfile_name)
 
   cat >> "$LOGFILE" <<EOF
 
@@ -597,6 +640,48 @@ do_run() {
   # Run virtualization, booting from the virtual hard disk
 
   run_vm --boot-disk
+}
+
+#----------------------------------------------------------------
+# The stop command
+
+do_stop() {
+  if [ ! -e "$IMAGE" ]; then
+    echo "$IMAGE: does not exist"
+    exit 1
+  fi
+
+  local LOGFILE=$(_logfile_name)
+
+  if [ ! -e "$LOGFILE" ]; then
+    echo "$EXE: $IMAGE: not running" >&2
+    exit 1
+  fi
+
+  local UPLOAD_SCRIPT="${IMAGE}.UPLOADING"
+
+  if [ -e "$UPLOAD_SCRIPT" ]; then
+    echo "$EXE: $IMAGE: uploading in progress or had failed"
+    exit 1
+  fi
+
+  local LAST_LINE=$(tail -1 "$LOGFILE")
+
+  if echo "$LAST_LINE" | grep -qE '.*qemu.*: PID=[0-9]+$'; then
+    # Last operation was creating/running the VM
+    local PID=$(echo "$LAST_LINE" | sed -E 's/^.*: PID=//')
+
+    if ! kill -0 $PID >/dev/null 2>&1; then
+      echo "$PROG: $IMAGE: was no longer running"
+    fi
+
+    if ! kill $PID ; then
+      echo "$EXE: error trying to kill the VM process (PID=$PID)" >&2
+      exit 1
+    fi
+
+    exit 0
+  fi
 }
 
 #----------------------------------------------------------------
@@ -761,7 +846,7 @@ EOF
 
   # Determine log file name
 
-  local LOGFILE="${IMAGE}.log"
+  local LOGFILE=$(_logfile_name)
 
   # Determine upload script filename
 
@@ -903,6 +988,82 @@ EOF
 }
 
 #----------------------------------------------------------------
+# The status command
+
+do_status() {
+  local LOGFILE=$(_logfile_name)
+  local UPLOAD_SCRIPT="${IMAGE}.UPLOADING"
+
+  if [ ! -e "$IMAGE" ]; then
+    # No image file
+
+    if [ -e "$LOGFILE" ]; then
+      echo "$EXE: warning: orphaned log file exists: $LOGFILE" >&2
+    fi
+    if [ -e "$UPLOAD_SCRIPT" ]; then
+      echo "$EXE: warning: orphaned upload script exists: $UPLOAD_SCRIPT" >&2
+    fi
+
+    echo "$IMAGE: does not exist"
+    exit 1
+  fi
+
+  # Image file exists after this point
+
+  if [ ! -e "$LOGFILE" ]; then
+    # No log file
+
+    if [ -e "$UPLOAD_SCRIPT" ]; then
+      echo "$EXE: error: orphaned upload script exists: $UPLOAD_SCRIPT" >&2
+      exit 1
+    fi
+
+    echo "$IMAGE: ready"
+    exit 0
+  fi
+
+  # Image and log file both exists after this point
+
+  local LAST_LINE=$(tail -1 "$LOGFILE")
+
+  if [ -e "$UPLOAD_SCRIPT" ]; then
+    # Was uploading: might still be running or was aborted
+
+    if echo "$LAST_LINE" |  grep -qE '/kill/' ; then
+      # While in progress and there are no errors, the last line is
+      # the instruction on how to kill the upload. That was not found.
+      echo "$EXE: error: upload failed (see $LOGFILE for details)" >&2
+      exit 1
+    else
+      echo "$IMAGE: uploading in progress"
+      exit 0
+    fi
+  else
+    # No upload script, so is/was not uploading
+
+    if echo "$LAST_LINE" | grep -qE ': upload completed'; then
+      # Last operation was a successfully completed upload
+      local DURATION=$(echo "$LAST_LINE" | sed 's/^.*: upload completed //' )
+      echo "$IMAGE: ready: upload finished in $DURATION"
+
+    elif echo "$LAST_LINE" | grep -qE '.*qemu.*: PID=[0-9]+$'; then
+      # Last operation was creating/running the VM
+      local PID=$(echo "$LAST_LINE" | sed -E 's/^.*: PID=//')
+      if kill -0 $PID >/dev/null 2>&1; then
+	echo "$IMAGE: virtual machine is running"
+      else
+	echo "$IMAGE: ready"
+      fi
+    else
+      # Last operation was not a successfully completed upload
+      echo "$IMAGE: ready"
+    fi
+
+    exit 0
+  fi
+}
+
+#----------------------------------------------------------------
 # Main
 
 case "$CMD" in
@@ -912,8 +1073,14 @@ case "$CMD" in
   run)
     do_run
     ;;
+  stop)
+    do_stop
+    ;;
   upload)
     do_upload
+    ;;
+  status)
+    do_status
     ;;
   *)
     echo "$EXE: internal error: unknown command: $CMD" >&2

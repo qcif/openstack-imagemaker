@@ -63,7 +63,7 @@ Guides are available to show the use of this script for creating
 images for:
 
 - [Linux](doc/linux-images.md)
-- [Windows](doc/windows-images.md)
+- [Microsoft Windows](doc/windows-images.md)
 
 Requirements
 ------------

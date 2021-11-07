@@ -66,7 +66,7 @@ _qemu-kvm_ and _glance_ commands.
 
 Create an disk image and boot off the ISO image. By default, a 10 GiB
 disk image, which is the maximum size of the standard boot disk
-supported by NeCTAR's deployment of OpenStack.  It is stored in the
+supported by Nectar's deployment of OpenStack.  It is stored in the
 QEMU Copy-On-Write version 2 (QCOW2) format, and the VNC server is
 listening on display 0 (port 5900). If needed, these defaults can be
 changed using command line options.
@@ -380,8 +380,8 @@ Configure the security groups to allow ssh access, and you should be
 able to ssh to the VM instance: as the user that was created,
 cloud-user, or root -- depending on how the image was configured.
 
-When testing images, launch them in the NeCTAR Melbourne availability
-zone.  The NeCTAR glance image server is in Melbourne, so that avoids
+When testing images, launch them in the Nectar Melbourne availability
+zone.  The Nectar glance image server is in Melbourne, so that avoids
 sending the test images over the network to a different availability
 zone.
 
