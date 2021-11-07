@@ -1,51 +1,60 @@
-QRIScloud utilities
-===================
+OpenStack Image Maker
+=====================
 
-Utilities for working with the QRIScloud virtual machine instances and
-data storage.
+The _openstack-image-maker_ script simplifies the process of creating
+and uploading an image to OpenStack.
 
-[QRIScloud](https://www.qriscloud.org.au) is a set of services
-provided by the _Queensland Cyber Infrastructure Foundation_
-([QCIF](https://www.qcif.edu.au)).
+It invokes the QEMU KVM commands to create the image file, and to run
+a virtual machine instance with it, so the operating system can be
+installed onto it. It also runs the OpenStack command to upload the
+image.
 
-Scripts
--------
+While those steps can be performed directly using the QEMU KVM and
+OpenStack commands, this script invokes them with the options needed
+for common tasks. Therefore, the user does not have to remember their
+complicated options.
 
-### NFS mounting QRISdata Collection Storage allocations
+## Example
 
-The [q-storage-setup](q-storage-setup.md) script can be used
-to setup a mount to access a QRISdata Collection Storage allocation
-using NFS.
+Create the image, prepare it and upload it:
 
-Note: the allocation must be enabled for NFS access and the
-virtual machine instance must be running in Nectar's _QRIScloud_
-availability zone.
+```sh
+$ openstack-image-maker create --iso os-install-disc.iso image.qcow2
 
-### Creating OpenStack images for Nectar
+$ openstack-image-maker run image.qcow2  # optional
 
-The [q-image-maker](openstack-images/q-image-maker.md) script can
-assist with the process of creating a virtual machine images
-for Nectar.
+$ openstack-image-maker upload --name "My new image" --min-disk 10  image.qcow2
+```
 
-For example, if you want to instantiate a virtual machine instance
-with a different operating system: one that someone else has not
-created a Nectar image for you to use.
+During the preparation step, the operating system is installed onto
+the image.  That step is performed over a VNC session, and is similar
+to installing the operating system onto any physical or virtual
+machine.
 
-It has been used to create Linux and Windows images.
+## Documentation
 
-See the [openstack-images](../../tree/master/openstack-images) folder
-for details.
+A manual page for the utility is in:
+
+- [openstack-image-maker](openstack-image-maker.md)
+
+See the _doc_ directory for details on how to use it.
+
+- [Common setup](doc/common-setup.md)
+
+- [Preparing Linux images](doc/linux-images.md)
+
+- [Preparing Windows images](doc/windows-images.md)
 
 Licence
 -------
 
-These scripts are distributed in the hope that they will be useful,
-but **without any warranty**; without even the implied warranty of
+This utility is distributed in the hope that they will be useful, but
+**without any warranty**; without even the implied warranty of
 **merchantability** or **fitness for a particular purpose**.  See the
 GNU General Public License for more details.
 
-Contact
--------
+## Reporting issues
 
-Please send feedback and queries to
-[QRIScloud Support](https://support.qriscloud.org.au/).
+Please submit issues using the repository's [GitHub
+issues](https://github.com/qcif/openstack-image-maker/issues)
+
