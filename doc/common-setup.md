@@ -56,7 +56,6 @@ CentOS 7:
 
     [ec2-user@host]$ sudo yum install -y python3
     [ec2-user@host]$ sudo pip3 install --upgrade pip
-
     [ec2-user@host]$ sudo pip3 install python-openstackclient
 
 CentOS 8 Stream:

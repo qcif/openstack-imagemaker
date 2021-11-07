@@ -72,15 +72,15 @@ using _curl_ or _wget_:
 
 #### 1d. Get the script
 
-Get a copy of the _q-image-maker.sh_ script onto the creation
+Get a copy of the _openstack-image-maker_ script onto the creation
 host. This can be done by uploading it or downloading it. The example
 below downloads it from the GitHub respository. Note: if GitHub
 changes the raw download URL, find out its new value from the [project
 in GitHub](https://github.com/qcif/cloud-utils).
 
     [creator@host]$ cd /mnt/creator
-    [creator@host]$ curl -O https://raw.githubusercontent.com/qcif/cloud-utils/master/q-image-maker.sh
-    [creator@host]$ chmod a+x q-image-maker.sh
+    [creator@host]$ curl -O https://raw.githubusercontent.com/qcif/openstack-image-maker/master/openstack-image-maker
+    [creator@host]$ chmod a+x openstack-image-maker
 
 ### Step 2: Install the guest system from the ISO
 
@@ -89,10 +89,10 @@ in GitHub](https://github.com/qcif/cloud-utils).
 Create an disk image, and run a virtual machine with it and the two
 ISO images:
 
-    [creator@host]$ ./q-image-maker.sh create \
-                                       --iso windows.iso --iso virtio-win.iso \
-                                       --agent \
-                                       --size 30  image.qcow2
+    [creator@host]$ ./openstack-image-maker create \
+                                            --iso windows.iso --iso virtio-win.iso \
+                                            --agent \
+                                            --size 30  image.qcow2
 
 The disk image **must** be large enough to hold the operating system
 and any extra software installed on the image. Set the target disk size in
@@ -134,8 +134,8 @@ The disk image will be in the default QEMU Copy-On-Write version 2
 "qcow2" format, which is required for it to be used as the boot
 disk. If the image will be used on volume storage, the "raw" format
 needs to be used. Use the `--format` option to set the format; use the
-`--help` option or read the [q-image-maker
-manual](https://github.com/qcif/cloud-utils/blob/master/openstack-images/q-image-maker.md)
+`--help` option or read the [openstack-image-maker
+manual](https://github.com/qcif/openstack-image-maker/blob/master/openstack-image-maker)
 (a Markdown file from the GitHub repository) for details.
 
 The VNC server is listening by default on display 0 (port 5900). Use a
@@ -531,7 +531,7 @@ before finalising the image.
 If additional configuration needs to be performed, run a guest
 virtual machine by booting off the disk image.
 
-    $ ./q-image-maker.sh run image.qcow2
+    $ ./openstack-image-maker run image.qcow2
 
 As before, connect to the VNC server (through the ssh tunnel) without
 using a VNC password.
@@ -660,7 +660,7 @@ Sysprep must be rerun on it.
 
 Upload the disk image, optionally giving it a name:
 
-    [creator@host]$ ./q-image-maker.sh upload --windows --agent --name "My new image" image.qcow2
+    [creator@host]$ ./openstack-image-maker upload --windows --agent --name "My new image" image.qcow2
 
 The `--windows` option sets the "os_type" property on the image.  It
 controls the behaviour when the image is used. For example, instances
