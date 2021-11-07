@@ -19,7 +19,7 @@ complicated options.
 Create the image, prepare it and upload it:
 
 ```sh
-$ openstack-image-maker create --iso os-install-disc.iso image.qcow2
+$ openstack-image-maker create --iso os-install-disc.iso  image.qcow2
 
 $ openstack-image-maker run image.qcow2  # optional
 
@@ -37,7 +37,7 @@ A manual page for the utility is in:
 
 - [openstack-image-maker](openstack-image-maker.md)
 
-See the _doc_ directory for details on how to use it.
+See the _doc_ directory for details on how to use it:
 
 - [Common setup](doc/common-setup.md)
 

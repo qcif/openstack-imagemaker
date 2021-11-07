@@ -4,11 +4,11 @@
 #
 # To create a disk image:
 #
-#     q-image-maker.sh create --iso install-disc.iso example.qcow2
+#     openstack-image-maker create --iso install-disc.iso example.qcow2
 #
 # To upload an disk image to Openstack:
 #
-#     q-image-maker.sh upload example.qcow2
+#     openstack-image-maker upload example.qcow2
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,8 +26,8 @@
 # Copyright (C) 2013-2021, Queensland Cyber Infrastructure Foundation Ltd.
 #----------------------------------------------------------------
 
-PROGRAM='q-image-maker'
-VERSION='2.6.0'
+PROGRAM='openstack-image-maker'
+VERSION='2.6.1'
 
 EXE=$(basename "$0" .sh)
 EXE_EXT=$(basename "$0")

@@ -14,10 +14,11 @@ OpenStack.
 Requirements
 ------------
 
+- Local machine, with a ssh client and a VNC client.
+- Creation host, with QEMU and the OpenStack client: see the [common
+  setup](common-setup.md) for details.
+- Installation ISO image for the Linux operating system (e.g. CentOS 8 Stream).
 - OpenStack project to upload the image to.
-- Local system, with a ssh client and a VNC client.
-- Creation host system, with QEMU and glance (e.g. a [configured VM instance](README-init.md)).
-- Installation ISO image for the CentOS Stream 8.
 
 Process
 -------

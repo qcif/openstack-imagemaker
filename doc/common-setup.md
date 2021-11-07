@@ -130,5 +130,5 @@ Log out of the creation host.
 See also
 --------
 
-- [Creating an image for Linux](README-linux.md)
-- [Creating an image for Microsoft Windows](README-windows.md)
+- [Creating a Linux image](linux-images.md)
+- [Creating a Microsoft Windows image](windows-images.md)

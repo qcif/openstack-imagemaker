@@ -11,7 +11,8 @@ Requirements
 ------------
 
 - Local machine, with a ssh client and a VNC client.
-- Creation host, with QEMU and the OpenStack client (e.g. a [configured VM instance](README-init.md)).
+- Creation host, with QEMU and the OpenStack client: see the [common
+  setup](common-setup.md) for details.
 - Installation ISO image for _Microsoft Windows Server 2022_.
 - VirtIO drivers for Windows ISO image.
 - Suitable licence for Microsoft Windows Server 2022 (optinal for testing).
@@ -871,8 +872,3 @@ See also
 - [Cloudbase-Init documentation](https://cloudbase-init.readthedocs.io/en/latest/)
 
 - [Windows Openstack imaging tools](https://github.com/cloudbase/windows-openstack-imaging-tools/) for use on a host running Windows.
-
-Contact
--------
-
-Please send feedback and queries to Hoylen Sue at <hoylen.sue@qcif.edu.au>.

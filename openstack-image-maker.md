@@ -62,8 +62,8 @@ Examples
 Guides are available to show the use of this script for creating
 images for:
 
-- [Linux](README-linux.md)
-- [Windows](README-windows.md)
+- [Linux](doc/linux-images.md)
+- [Windows](doc/windows-images.md)
 
 Requirements
 ------------
