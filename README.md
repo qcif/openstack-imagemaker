@@ -1,7 +1,7 @@
 OpenStack Image Maker
 =====================
 
-The _openstack-image-maker_ script simplifies the process of creating
+The _openstack-imagemaker_ script simplifies the process of creating
 and uploading an image to OpenStack.
 
 It invokes the QEMU KVM commands to create the image file, and to run
@@ -19,11 +19,11 @@ complicated options.
 Create the image, prepare it and upload it:
 
 ```sh
-$ openstack-image-maker create --iso os-install-disc.iso  image.qcow2
+$ openstack-imagemaker create --iso os-install-disc.iso  image.qcow2
 
-$ openstack-image-maker run image.qcow2  # optional
+$ openstack-imagemaker run image.qcow2  # optional
 
-$ openstack-image-maker upload --name "My new image" --min-disk 10  image.qcow2
+$ openstack-imagemaker upload --name "My new image" --min-disk 10  image.qcow2
 ```
 
 During the preparation step, the operating system is installed onto
@@ -35,7 +35,7 @@ machine.
 
 The utility is documented in:
 
-- [openstack-image-maker](openstack-image-maker.md) manual page
+- [openstack-imagemaker](openstack-imagemaker.md) manual page
 
 See the _doc_ directory for details on how to use it:
 
@@ -56,5 +56,5 @@ GNU General Public License for more details.
 ## Reporting issues
 
 Please submit issues using the repository's [GitHub
-issues](https://github.com/qcif/openstack-image-maker/issues)
+issues](https://github.com/qcif/openstack-imagemaker/issues)
 
