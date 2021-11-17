@@ -47,17 +47,17 @@ working directory.
 
 #### 1c. Get the script
 
-Get a copy of the _openstack-image-maker_ script onto the creation
+Get a copy of the _openstack-imagemaker_ script onto the creation
 host. This can be done by uploading it or downloading it. The example
 below downloads it from the GitHub respository. Note: if GitHub
 changes the raw download URL, find out its new value from the [project
 in GitHub](https://github.com/qcif/cloud-utils).
 
     [creator@host]$ cd /mnt/creator
-    [creator@host]$ curl -O https://raw.githubusercontent.com/qcif/openstack-image-maker/master/openstack-image-maker
-    [creator@host]$ chmod a+x openstack-image-maker
+    [creator@host]$ curl -O https://raw.githubusercontent.com/qcif/openstack-imagemaker/main/openstack-imagemaker
+    [creator@host]$ chmod a+x openstack-imagemaker
 
-The _openstack-image-maker_ script is just a convenient way to invoke the
+The _openstack-imagemaker_ script is just a convenient way to invoke the
 _qemu-kvm_ and _glance_ commands.
 
 ### Step 2: Install the guest system from the ISO
@@ -71,7 +71,7 @@ QEMU Copy-On-Write version 2 (QCOW2) format, and the VNC server is
 listening on display 0 (port 5900). If needed, these defaults can be
 changed using command line options.
 
-    [creator@host]$ ./openstack-image-maker create \
+    [creator@host]$ ./openstack-imagemaker create \
                     --iso CentOS-6.5-x86_64-minimal.iso \
                     disk.qcow2
 
@@ -332,7 +332,7 @@ accessed by typing Ctrl-Alt-2 into the VNC client).
 If additional configuration needs to be performed, restart the guest
 virtual machine by booting off the disk image.
 
-    $ ./openstack-image-maker run disk.qcow2
+    $ ./openstack-imagemaker run disk.qcow2
 
 As before, connect to the VNC server (through the ssh tunnel) with an
 empty password.
@@ -364,7 +364,7 @@ to upload.
 
 Upload the disk image, optionally giving it a name:
 
-    [creator@host]$ ./openstack-image-maker upload --linux --name "My CentOS image" --min-disk 10 disk.qcow2
+    [creator@host]$ ./openstack-imagemaker upload --linux --name "My CentOS image" --min-disk 10 disk.qcow2
 
 If the QEMU Guest Agent has been installed, include the `--agent`
 option to set the metadata on the uploaded image. Do not use that
